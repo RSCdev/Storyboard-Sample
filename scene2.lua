@@ -11,6 +11,8 @@ local scene = storyboard.newScene()
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 
+local image, text1, text2, text3
+
 local function onSceneTouch( self, event )
 	if event.phase == "began" then
 		
@@ -26,36 +28,28 @@ end
 function scene:createScene( event )
 	local screenGroup = self.view
 	
-	local image = display.newImage( "bg2.jpg" )
+	image = display.newImage( "bg2.jpg" )
 	screenGroup:insert( image )
 	
 	image.touch = onSceneTouch
 	
-	local text1 = display.newText( "Scene 2", 0, 0, native.systemFontBold, 24 )
+	text1 = display.newText( "Scene 2", 0, 0, native.systemFontBold, 24 )
 	text1:setTextColor( 255 )
 	text1:setReferencePoint( display.CenterReferencePoint )
 	text1.x, text1.y = display.contentWidth * 0.5, 50
 	screenGroup:insert( text1 )
 	
-	local text2 = display.newText( "MemUsage: ", 0, 0, native.systemFont, 16 )
+	text2 = display.newText( "MemUsage: ", 0, 0, native.systemFont, 16 )
 	text2:setTextColor( 255 )
 	text2:setReferencePoint( display.CenterReferencePoint )
 	text2.x, text2.y = display.contentWidth * 0.5, display.contentHeight * 0.5
 	screenGroup:insert( text2 )
 	
-	local text3 = display.newText( "Touch to continue.", 0, 0, native.systemFontBold, 18 )
+	text3 = display.newText( "Touch to continue.", 0, 0, native.systemFontBold, 18 )
 	text3:setTextColor( 255 ); text3.isVisible = false
 	text3:setReferencePoint( display.CenterReferencePoint )
 	text3.x, text3.y = display.contentWidth * 0.5, display.contentHeight - 100
 	screenGroup:insert( text3 )
-	
-	local showMem = function()
-		image:addEventListener( "touch", image )
-		text3.isVisible = true
-		text2.text = text2.text .. collectgarbage("count")/1000 .. "MB"
-		text2.x = display.contentWidth * 0.5
-	end
-	local memTimer = timer.performWithDelay( 1000, showMem, 1 )
 	
 	print( "\n2: createScene event" )
 end
@@ -66,8 +60,17 @@ function scene:enterScene( event )
 	
 	print( "2: enterScene event" )
 	
-	-- remove testscreen1's view
-	storyboard.purgeScene( "testscreen1" )
+	-- remove previous scene's view
+	storyboard.purgeScene( "scene1" )
+	
+	-- Update Lua memory text display
+	local showMem = function()
+		image:addEventListener( "touch", image )
+		text3.isVisible = true
+		text2.text = text2.text .. collectgarbage("count")/1000 .. "MB"
+		text2.x = display.contentWidth * 0.5
+	end
+	local memTimer = timer.performWithDelay( 1000, showMem, 1 )
 end
 
 
@@ -75,6 +78,12 @@ end
 function scene:exitScene()
 	
 	print( "2: exitScene event" )
+	
+	-- remove touch listener for image
+	image:removeEventListener( "touch", image )
+	
+	-- reset label text
+	text2.text = "MemUsage: "
 end
 
 
