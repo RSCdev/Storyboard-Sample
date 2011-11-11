@@ -1,0 +1,110 @@
+
+local scene =
+
+storyboard.newScene = function()
+	-- creates an EventListener object
+	return Runtime:new() -- TODO: replace with EventListener:new()
+end
+
+-- load 'scene'
+nagivator.loadScene = function( name )
+	local scene = package.LOADED[name]
+	if ( not scene ) then
+		-- should only execute once per 'name'
+		-- unless the scene is removed
+		scene = require( name )
+		package.LOADED[name] = scene
+	end
+
+	local event = {}
+
+	if ( not scene.view ) then
+		scene.view = display.newGroup()
+
+		event.name="createScene"
+		scene:dispatchEvent( event )
+	end
+
+	event.name="enterScene"
+	scene:dispatchEvent( event )
+
+	-- transition stuff
+end
+
+-- about to exit 'scene'
+
+local event = {}
+
+event.name="exitScene"
+scene:dispatchEvent( event )
+
+
+-- need to free memory
+nagivator.unloadScene = function( name )
+	local scene = package.LOADED[name]
+
+	if ( scene and scene.view ) then
+		local event = {}
+
+		event.name="destroyScene"
+		scene:dispatchEvent( event )
+		scene.view:removeSelf()
+		scene.view = nil
+	end
+end
+
+-- need to free memory
+nagivator.removeScene = function( name )
+	navigator.unloadScene( name )
+
+	-- destroy global reference to 'scene'
+	package.LOADED[name] = nil
+end
+
+
+---------------------------------------------------------------------------------------------
+
+* Transition screens like before, with the exception of holding onto the screen's view.
+
+* View must manually be removed using 'unloadScene' (later: auto-remove based on something)
+
+* Scenes are never completely destroyed unless user calls 'removeScene' explicitly.
+
+---------------------------------------------------------------------------------------------
+
+TODO:
+
+* remove state table for each scene, and all references to it
+
+* store 'view' directly in package.loaded[] table.
+
+* remove addEventListener/removeEventlistener function
+
+* add storyboard.newScene() to map to Runtime:new() function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
